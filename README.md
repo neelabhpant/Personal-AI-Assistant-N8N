@@ -59,7 +59,17 @@ The assistant follows a **hub-and-spoke architecture** within n8n:
 ---
 
 ## Screenshots
+Personal AI Assistant
 ![Screenshot 2025-06-08 at 11 38 28 AM](https://github.com/user-attachments/assets/00c2dc0b-ca6a-4827-ab4e-df15a35504da)
+
+Email Agent
+![Screenshot 2025-06-08 at 11 39 01 AM](https://github.com/user-attachments/assets/989a7929-a157-454a-80fe-f770fc7e8fa1)
+
+Calendar Agent
+![Screenshot 2025-06-08 at 11 39 17 AM](https://github.com/user-attachments/assets/e9c75133-cdf1-437d-8569-27540df3634b)
+
+
+
 ---
 
 ## Getting Started
