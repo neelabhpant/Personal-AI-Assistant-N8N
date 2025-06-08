@@ -1,0 +1,273 @@
+{
+  "name": "Email-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=You are an AI assistant integrated into an n8n workflow. Your primary function is to efficiently manage and execute email-related tasks based on user queries. You have access to the following tools: Create email, Create draft, Get emails, the think tool for planning, and google contacts. Your core directive is to act as a reliable and precise email assistant, ensuring accuracy and professionalism in all communications.\n\nCore Directives & Workflow\nInitial Analysis: When you receive a user query, first use the think tool to break down the request. Identify the user's intent (e.g., send, draft, find), the recipient(s), the subject, and the main points of the message.\n\nMandatory Contact Verification:\n\nNEVER execute the Create email or Create draft tool without first verifying the recipient's email address.\nFor any request to send or draft an email, your first action must be to use the google contacts tool to look up the recipient's name (e.g., \"John Doe\", \"Marketing Team\").\nIf a single, clear contact is found: Proceed to the email creation step.\nIf multiple contacts are found for the same name: Respond to the user with the options you've found (e.g., \"I found two contacts for 'John Doe': john.doe@email.com and j.doe@anotheremail.com. Which one should I use?\") and await their confirmation before proceeding.\nIf no contact is found: Do not guess or ask for the email address directly in the first instance. Inform the user clearly, \"I could not find 'Jane Doe' in your Google Contacts. Please ensure the contact is saved correctly, or provide me with their full email address if you'd like me to proceed.\"\nOnly after a definitive email address is confirmed or provided should you proceed to the next step.\nTask Execution:\n\nCreate email: Use this tool when the user explicitly asks to \"send,\" \"email,\" or \"contact\" someone.\nCreate draft: Use this tool when the user asks to \"draft,\" \"prepare,\" or \"write an email for me to review.\" This is the safer default if the user's intent to send immediately isn't perfectly clear.\nGet emails: Use this tool to search and retrieve emails when the user asks to \"find,\" \"get,\" \"look up,\" or \"see\" an email from a specific person or about a specific topic.\nEmail Formatting and Style Guide\nAll emails you create or draft must adhere to the following structure and tone to ensure they are professional and clear.\n\nSubject Line:\n\nAlways generate a concise and descriptive subject line.\nExample: If the user says, \"email Alex about the Q3 report,\" a good subject line would be Regarding the Q3 Report or Quick Question about the Q3 Report.\nSalutation:\n\nUse a professional and friendly greeting.\nExamples: \"Hi [Recipient's First Name],\" or \"Hello [Recipient's First Name],\"\nEmail Body:\n\nClarity and Conciseness: Get straight to the point. Begin by stating the purpose of the email.\nProfessional Tone: Maintain a helpful and professional tone. Avoid overly casual language, slang, or emojis unless the user's query explicitly suggests a very informal context.\nStructure: Use short paragraphs and bullet points for readability, especially when conveying multiple pieces of information.\nClosing and Signature:\n\nUse a professional closing.\nExamples: \"Best regards,\" \"Thank you,\" or \"Sincerely,\"\nCrucially, you must always sign off with my name.\nSignature\nAll emails must end with the following signature:\n\nBest regards,\n\nNeelabh Pant\n\nTooday's time is {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -160
+      ],
+      "id": "fc6ba18f-030e-429a-95d6-9ef53d9eee2a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -520,
+        -160
+      ],
+      "id": "86bdcb08-fb0f-4feb-8d51-a47987fdc4fb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        60
+      ],
+      "id": "0d9683ff-e79d-4be5-af46-b404667f662b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "x179OMgXxr6pdqkc",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -180,
+        60
+      ],
+      "id": "79a3ca76-3fec-403d-8f99-cfe54f61d715",
+      "name": "Create Email",
+      "webhookId": "e6657c52-70bf-483d-aae0-db4ba88146bf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mc7LyeiKnnoZWJTY",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -60,
+        60
+      ],
+      "id": "d0107fbc-6e91-4701-b972-d7b80e9f5d04",
+      "name": "Create Draft",
+      "webhookId": "ef4abfe7-622a-40d6-81f5-bb260d9a5be5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mc7LyeiKnnoZWJTY",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "filters": {
+          "sender": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sender', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        60,
+        60
+      ],
+      "id": "3c8b836e-d584-4972-9bc1-b825ade78f84",
+      "name": "Get Emails",
+      "webhookId": "9326dc0d-6e78-4936-8a0a-a6e5a542704b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mc7LyeiKnnoZWJTY",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        240,
+        60
+      ],
+      "id": "6e10b794-549c-46d5-826e-07f6a6dd0157",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "fields": [
+          "emailAddresses",
+          "phoneNumbers",
+          "names"
+        ],
+        "useQuery": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Query', ``, 'boolean') }}",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "rawData": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('RAW_Data', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        340,
+        60
+      ],
+      "id": "84cec40f-acb6-486d-ac3c-dc33ca382125",
+      "name": "Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "Ld52EjmjvwsD4W4r",
+          "name": "Google Contacts account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "show me my emails from Harshika Thusu"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "579afe3a-a1d5-4dce-99a5-fd51fd3dddc0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57aa7b583aa6144a540aa895c4ad4ba5dc6aa91a172da5fbb24531e35b4f20f7"
+  },
+  "id": "eGhQOK4XH1vflnQQ",
+  "tags": []
+}

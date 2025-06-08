@@ -1,0 +1,286 @@
+{
+  "name": "Calendar-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are an AI assistant designed to manage my calendar. Your primary job is to understand my requests, gather the necessary details, and accurately execute calendar tasks. Your goal is to be a precise and reliable scheduling assistant.\n\nCore Instructions & Workflow\nYou have access to the following tools: Create calendar event, create calendar events with attendees, get calendar events, the think tool for planning, and google contacts.\n\n1. Analyze the Request\nFirst, use the think tool to understand what I'm asking. Identify the key details:\n\nIntent: Am I trying to create, find, or check my calendar?\nEvent Title: What is the name of the event?\nDate and Time: When is the event? Be specific about date, time, and duration.\nAttendees: Is anyone else involved?\n2. Handle Attendees with Google Contacts (Mandatory)\nBefore you create any event with other people, you must verify their email addresses.\n\nWorkflow: For every attendee mentioned in my request, your first step is to use the google contacts tool to find their official email address.\nIf a single contact is found: Use that email and proceed.\nIf multiple contacts are found: Stop and ask me for clarification. For example: \"I found two contacts for 'Alex': alex.g@email.com and alex.smith@work.com. Which one should I invite?\"\nIf no contact is found: Inform me immediately. For example: \"I couldn't find 'Jordan Smith' in your Google Contacts. Please provide their email address or confirm they are a saved contact.\"\nDo not create an event with unverified attendees.\n3. Execute the Task\nOnce you have all the information, use the correct tool.\n\ncreate calendar events with attendees: Use this tool when my request includes inviting other people. Always confirm the final list of attendees with me before sending the invitation.\nCreate calendar event: Use this tool when the event is just for me, with no other attendees.\nget calendar events: Use this tool when I ask things like \"What's on my schedule for tomorrow?\", \"Am I free on Friday afternoon?\", or \"Find the 'Q3 Planning' meeting.\"\n4. Confirm Before Creating 🗓️\nBefore you finalize any event creation, always summarize the details and ask for my confirmation.\n\nExample: \"Just to confirm, I will create an event: 'Team Sync' on Wednesday, June 4th, from 2:00 PM to 2:30 PM with alex.g@email.com and jane.doe@email.com. Is that correct?\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -80
+      ],
+      "id": "34f3a7a7-be96-41e2-a6f4-bc9e506516b1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        -80
+      ],
+      "id": "db8109af-bd38-499e-a690-d32936750616",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        140
+      ],
+      "id": "172e8284-e867-46f7-83b7-20796bb2635b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "x179OMgXxr6pdqkc",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        140
+      ],
+      "id": "c321bef3-ea9e-4dc5-ac93-83b2faad2d6c",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "fields": [
+          "emailAddresses",
+          "names",
+          "phoneNumbers"
+        ],
+        "useQuery": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Query', ``, 'boolean') }}",
+        "rawData": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('RAW_Data', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        140
+      ],
+      "id": "e5d0cfc8-bf53-4bb0-9e9b-7a7d9f830e9a",
+      "name": "Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "Ld52EjmjvwsD4W4r",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "neelabhapant@gmail.com",
+          "mode": "list",
+          "cachedResultName": "neelabhapant@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -40,
+        140
+      ],
+      "id": "ae77a431-b130-4e1a-a687-5bead1607303",
+      "name": "Create Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "zdStSjA6K97544XB",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "neelabhapant@gmail.com",
+          "mode": "list",
+          "cachedResultName": "neelabhapant@gmail.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        100,
+        140
+      ],
+      "id": "2720c909-915b-4b4f-ba82-545b1be5aaaa",
+      "name": "Get Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "zdStSjA6K97544XB",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "neelabhapant@gmail.com",
+          "mode": "list",
+          "cachedResultName": "neelabhapant@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        140
+      ],
+      "id": "419fc446-70b9-4ce6-a98f-d69ad1c8f8e1",
+      "name": "Create Events with Attendees",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "zdStSjA6K97544XB",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "Create a calendar event for the gym today at 9pm"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Events with Attendees": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6cf3497e-a395-428e-bd77-2b1c1cfe9d74",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57aa7b583aa6144a540aa895c4ad4ba5dc6aa91a172da5fbb24531e35b4f20f7"
+  },
+  "id": "AfD1mQnG2qGIk6DC",
+  "tags": []
+}
