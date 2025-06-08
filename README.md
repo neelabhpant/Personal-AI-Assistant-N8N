@@ -59,7 +59,7 @@ The assistant follows a **hub-and-spoke architecture** within n8n:
 ---
 
 ## Screenshots
-
+![Screenshot 2025-06-08 at 11 38 28 AM](https://github.com/user-attachments/assets/00c2dc0b-ca6a-4827-ab4e-df15a35504da)
 ---
 
 ## Getting Started
